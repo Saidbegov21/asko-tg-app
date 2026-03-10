@@ -3,8 +3,7 @@ import { vMaska } from "maska/vue";
 import type { FormSubmitEvent } from "#ui/types";
 import { ReviewSchema, type ReviewFormData } from "~/schema/schema";
 import { locationsForSelect } from "~/schema/schema";
-import Logo from "../public/Logo.png"
-
+import Logo from "../public/Logo.png";
 
 const form = reactive<ReviewFormData>({
   location: "",
@@ -15,35 +14,38 @@ const form = reactive<ReviewFormData>({
 
 const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
   // 1. Безопасный доступ к Telegram WebApp (проверка на клиентскую среду)
-  const tg = typeof window !== 'undefined' ? (window as any).Telegram?.WebApp : null;
-  
+  const tg =
+    typeof window !== "undefined" ? (window as any).Telegram?.WebApp : null;
+
   // 2. Извлекаем данные пользователя
   const user = tg?.initDataUnsafe?.user;
 
   try {
     // 3. Выполнение POST-запроса через базовый $fetch
-    const response = await $fetch('https://ffb74effa1e39f6b.mokky.dev/formdata', {
-      method: 'POST',
-      body: {
-        ...event.data,
-        telegram: {
-          username: user?.username || "none",
-          user_id: user?.id,
-          first_name: user?.first_name
+    const response = await $fetch(
+      "https://ffb74effa1e39f6b.mokky.dev/formdata",
+      {
+        method: "POST",
+        body: {
+          ...event.data,
+          telegram: {
+            username: user?.username || "none",
+            user_id: user?.id,
+            first_name: user?.first_name,
+          },
+          initData: tg?.initData,
         },
-        initData: tg?.initData 
-      }
-    });
+      },
+    );
 
     // 4. Логика при успехе
     console.log("Успешно отправлено:", response);
     alert("Отзыв успешно отправлен!");
 
     tg?.close();
-
   } catch (error: any) {
     console.error("Ошибка при запросе:", error);
-    alert(`Ошибка: ${error.statusText || 'Не удалось отправить форму'}`);
+    alert(`Ошибка: ${error.statusText || "Не удалось отправить форму"}`);
   }
 };
 </script>
@@ -55,9 +57,9 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
       :state="form"
       @submit="onSubmit"
     >
-      <UCard color variant="subtle" class="h-full"">
+      <UCard color variant="subtle" class="h-full">
         <template #header>
-          <img class="w-40 mx-auto" :src="Logo" alt="">
+          <img class="w-40 mx-auto" :src="Logo" alt="" />
         </template>
         <UFormField
           class="pt-4"
@@ -94,7 +96,7 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
 
         <UFormField class="pt-4" label="Отзыв" name="review">
           <UTextarea
-          icon="line-md:chat-filled"
+            icon="line-md:chat-filled"
             class="w-full"
             v-model="form.review"
             placeholder="Что понравилось / что улучшить?"
