@@ -1,11 +1,9 @@
 <script setup>
 onMounted(() => {
-  if (window.Telegram?.WebApp) {
-    const tg = window.Telegram.WebApp
-    tg.ready()
-    tg.expand()
+  if (import.meta.client && window.Telegram?.WebApp) {
+    window.Telegram.WebApp.expand();
   }
-})
+});
 </script>
 
 <template>
