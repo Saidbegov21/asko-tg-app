@@ -52,6 +52,7 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
   if (submitted.value) return;
   loading.value = true;
   try {
+    const tg = (window as any).Telegram?.WebApp;
     await $fetch("https://ffb74effa1e39f6b.mokky.dev/formdata", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -67,6 +68,12 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
     });
 
     submitted.value = true;
+
+    if (tg) {
+      setTimeout(() => tg.close(), 2000);
+    } else {
+      alert("Отзыв успешно отправлен!");
+    }
   } catch (error: any) {
     const message =
       error?.data?.message || "Ошибка отправки. Попробуйте снова.";
@@ -160,8 +167,8 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
                 @click="setRating(star)"
                 @mouseenter="hoveredStar = star"
                 @mouseleave="hoveredStar = 0"
-                class="text-5xl transition-all duration-100 active:scale-90 cursor-pointer select-none leading-none"
                 :disabled="submitted"
+                class="text-5xl transition-all duration-100 active:scale-90 cursor-pointer select-none leading-none"
               >
                 <span
                   :class="
@@ -186,9 +193,9 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
           <UButton
             type="submit"
             block
+            color="error"
             :loading="loading"
             :disabled="loading || submitted"
-            color="error"
             class="w-full py-4 rounded-2xl text-base font-bold tracking-wide transition-all cursor-pointer"
             :class="
               submitted
