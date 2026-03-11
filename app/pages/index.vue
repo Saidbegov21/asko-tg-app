@@ -70,7 +70,7 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
     submitted.value = true;
 
     if (tg) {
-      setTimeout(() => tg.close(), 2000);
+      setTimeout(() => tg.close(), 1000);
     } else {
       alert("Отзыв успешно отправлен!");
     }
