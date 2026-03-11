@@ -6,7 +6,6 @@ import {
   type ReviewFormData,
   locationsForSelect,
 } from "~/schema/schema";
-import Logo from "../public/Logo.png";
 
 const form = ref<ReviewFormData>({
   location: "",
@@ -20,7 +19,6 @@ const telegramUser = ref<any>(null);
 const telegramInitData = ref<string>("");
 
 onMounted(() => {
-  // Проверка на клиент + приведение к any для безопасности
   if (import.meta.client) {
     const tg = (window as any).Telegram?.WebApp;
     if (tg) {
@@ -37,32 +35,32 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
   try {
     const tg = (window as any).Telegram?.WebApp;
 
-    const response = await $fetch(
-      "https://ffb74effa1e39f6b.mokky.dev/formdata",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: {
-          ...event.data,
-          telegram: {
-            id: telegramUser.value?.id,
-            username: telegramUser.value?.username,
-            first_name: telegramUser.value?.first_name,
-          },
-          initData: telegramInitData.value,
+    await $fetch("https://ffb74effa1e39f6b.mokky.dev/formdata", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: {
+        ...event.data,
+        telegram: {
+          id: telegramUser.value?.id,
+          username: telegramUser.value?.username,
+          first_name: telegramUser.value?.first_name,
         },
+        initData: telegramInitData.value,
       },
-    );
+    });
 
     if (tg) {
-      tg.showPopup({ title: "Успех!", message: "Отзыв отправлен" });
-      setTimeout(() => tg.close(), 1200);
+      tg.showPopup(
+        { title: "Успех!", message: "Отзыв успешно отправлен!" },
+        () => tg.close(),
+      );
     } else {
       alert("Отзыв успешно отправлен!");
     }
   } catch (error: any) {
     const tg = (window as any).Telegram?.WebApp;
-    const message = error.data?.message || "Ошибка отправки";
+    const message =
+      error?.data?.message || "Ошибка отправки. Попробуйте снова.";
 
     if (tg) {
       tg.showPopup({ title: "Ошибка", message });
@@ -80,48 +78,49 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
     <UForm :schema="ReviewSchema" :state="form" @submit="onSubmit">
       <UCard color variant="subtle" class="h-full">
         <template #header>
-          <img class="w-40 mx-auto" :src="Logo" alt="Logo" />
+          <img class="w-40 mx-auto" src="/Logo.png" alt="Logo" />
         </template>
 
-        <UFormField label="Выберите заправочную станцию..." name="location">
-          <USelectMenu
-            placeholder="Выбор АЗС или ЭЗС"
-            icon="line-md:map-marker-twotone-loop"
-            class="w-full"
-            v-model="form.location"
-            :items="locationsForSelect"
-          />
-        </UFormField>
+        <div class="flex flex-col gap-4">
+          <UFormField label="Выберите заправочную станцию" name="location">
+            <USelectMenu
+              placeholder="Выбор АЗС или ЭЗС"
+              icon="line-md:map-marker-twotone-loop"
+              class="w-full"
+              v-model="form.location"
+              :items="locationsForSelect"
+            />
+          </UFormField>
 
-        <UFormField label="ФИО" name="fullName">
-          <UInput
-            icon="line-md:account"
-            class="w-full"
-            v-model="form.fullName"
-            placeholder="Имя Фамилия"
-          />
-        </UFormField>
+          <UFormField label="ФИО" name="fullName">
+            <UInput
+              icon="line-md:account"
+              class="w-full"
+              v-model="form.fullName"
+              placeholder="Имя Фамилия"
+            />
+          </UFormField>
 
-        <UFormField label="Номер телефона" name="phone">
-          <UInput
-            icon="line-md:phone-call-twotone-loop"
-            class="w-full"
-            v-model="form.phone"
-            v-maska="'+7 (###) ###-##-##'"
-            placeholder="+7 (___) ___-__-__"
-            type="tel"
-          />
-        </UFormField>
+          <UFormField label="Номер телефона" name="phone">
+            <UInput
+              icon="line-md:phone-call-twotone-loop"
+              class="w-full"
+              v-model="form.phone"
+              v-maska="'+7 (###) ###-##-##'"
+              placeholder="+7 (___) ___-__-__"
+              type="tel"
+            />
+          </UFormField>
 
-        <UFormField label="Отзыв" name="review">
-          <UTextarea
-            icon="line-md:chat-filled"
-            class="w-full"
-            v-model="form.review"
-            placeholder="Что понравилось / что улучшить?"
-            :rows="4"
-          />
-        </UFormField>
+          <UFormField label="Отзыв" name="review">
+            <UTextarea
+              class="w-full"
+              v-model="form.review"
+              placeholder="Что понравилось / что улучшить?"
+              :rows="4"
+            />
+          </UFormField>
+        </div>
 
         <template #footer>
           <UButton
