@@ -7,14 +7,11 @@ export const locationsArray = [
   "Аско№4 Улица Гамидова 39",
 ] as const;
 
-// Тип для проверки (извлекаем строки из массива)
 type Location = (typeof locationsArray)[number];
 
 export const locationsForSelect = [...locationsArray] as string[];
 
 export const ReviewSchema = z.object({
-  // 1. Сначала проверяем, что это строка и она не пустая
-  // 2. Затем проверяем, входит ли она в наш список
   location: z
     .string()
     .min(1, "Пожалуйста, выберите заправочную станцию")
@@ -34,6 +31,11 @@ export const ReviewSchema = z.object({
       /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/,
       "Неверный формат. Используйте: +7 (XXX) XXX-XX-XX",
     ),
+
+  rating: z
+    .number("Пожалуйста, поставьте оценку")
+    .min(1, "Пожалуйста, поставьте оценку")
+    .max(5),
 
   review: z
     .string()
