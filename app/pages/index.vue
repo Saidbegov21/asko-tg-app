@@ -1,71 +1,89 @@
 <script setup lang="ts">
 import { vMaska } from "maska/vue";
 import type { FormSubmitEvent } from "#ui/types";
-import { ReviewSchema, type ReviewFormData } from "~/schema/schema";
-import { locationsForSelect } from "~/schema/schema";
+import {
+  ReviewSchema,
+  type ReviewFormData,
+  locationsForSelect,
+} from "~/schema/schema";
 import Logo from "../public/Logo.png";
 
-const form = reactive<ReviewFormData>({
+const form = ref<ReviewFormData>({
   location: "",
   fullName: "",
   phone: "",
   review: "",
 });
 
-const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
-  // 1. Безопасный доступ к Telegram WebApp (проверка на клиентскую среду)
-  const tg =
-    typeof window !== "undefined" ? (window as any).Telegram?.WebApp : null;
+const loading = ref(false);
+const telegramUser = ref<any>(null);
+const telegramInitData = ref<string>("");
 
-  // 2. Извлекаем данные пользователя
-  const user = tg?.initDataUnsafe?.user;
+onMounted(() => {
+  // Проверка на клиент + приведение к any для безопасности
+  if (import.meta.client) {
+    const tg = (window as any).Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      telegramUser.value = tg.initDataUnsafe?.user;
+      telegramInitData.value = tg.initData;
+    }
+  }
+});
+
+const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
+  loading.value = true;
 
   try {
-    // 3. Выполнение POST-запроса через базовый $fetch
+    const tg = (window as any).Telegram?.WebApp;
+
     const response = await $fetch(
       "https://ffb74effa1e39f6b.mokky.dev/formdata",
       {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: {
           ...event.data,
           telegram: {
-            username: user?.username || "none",
-            user_id: user?.id,
-            first_name: user?.first_name,
+            id: telegramUser.value?.id,
+            username: telegramUser.value?.username,
+            first_name: telegramUser.value?.first_name,
           },
-          initData: tg?.initData,
+          initData: telegramInitData.value,
         },
       },
     );
 
-    // 4. Логика при успехе
-    console.log("Успешно отправлено:", response);
-    alert("Отзыв успешно отправлен!");
-
-    tg?.close();
+    if (tg) {
+      tg.showPopup({ title: "Успех!", message: "Отзыв отправлен" });
+      setTimeout(() => tg.close(), 1200);
+    } else {
+      alert("Отзыв успешно отправлен!");
+    }
   } catch (error: any) {
-    console.error("Ошибка при запросе:", error);
-    alert(`Ошибка: ${error.statusText || "Не удалось отправить форму"}`);
+    const tg = (window as any).Telegram?.WebApp;
+    const message = error.data?.message || "Ошибка отправки";
+
+    if (tg) {
+      tg.showPopup({ title: "Ошибка", message });
+    } else {
+      alert(`Ошибка: ${message}`);
+    }
+  } finally {
+    loading.value = false;
   }
 };
 </script>
+
 <template>
   <UContainer class="overflow-hidden m-4 max-w-md mx-auto">
-    <UForm
-      ref="formRef"
-      :schema="ReviewSchema"
-      :state="form"
-      @submit="onSubmit"
-    >
+    <UForm :schema="ReviewSchema" :state="form" @submit="onSubmit">
       <UCard color variant="subtle" class="h-full">
         <template #header>
-          <img class="w-40 mx-auto" :src="Logo" alt="" />
+          <img class="w-40 mx-auto" :src="Logo" alt="Logo" />
         </template>
-        <UFormField
-          class="pt-4"
-          label="Выберите заправочную станцию..."
-          name="location"
-        >
+
+        <UFormField label="Выберите заправочную станцию..." name="location">
           <USelectMenu
             placeholder="Выбор АЗС или ЭЗС"
             icon="line-md:map-marker-twotone-loop"
@@ -74,7 +92,8 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
             :items="locationsForSelect"
           />
         </UFormField>
-        <UFormField class="pt-4" label="ФИО" name="fullName">
+
+        <UFormField label="ФИО" name="fullName">
           <UInput
             icon="line-md:account"
             class="w-full"
@@ -83,7 +102,7 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
           />
         </UFormField>
 
-        <UFormField class="pt-4" label="Номер телефона" name="phone">
+        <UFormField label="Номер телефона" name="phone">
           <UInput
             icon="line-md:phone-call-twotone-loop"
             class="w-full"
@@ -94,7 +113,7 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
           />
         </UFormField>
 
-        <UFormField class="pt-4" label="Отзыв" name="review">
+        <UFormField label="Отзыв" name="review">
           <UTextarea
             icon="line-md:chat-filled"
             class="w-full"
@@ -103,8 +122,15 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
             :rows="4"
           />
         </UFormField>
+
         <template #footer>
-          <UButton type="submit" color="primary" block>
+          <UButton
+            type="submit"
+            color="primary"
+            block
+            :loading="loading"
+            :disabled="loading"
+          >
             Отправить отзыв
           </UButton>
         </template>
