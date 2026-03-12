@@ -53,15 +53,17 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
   loading.value = true;
   try {
     const tg = (window as any).Telegram?.WebApp;
-    await $fetch("https://ffb74effa1e39f6b.mokky.dev/formdata", {
+    await $fetch("https://something.loca.lt/review/", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "bypass-tunnel-reminder": "true",
+      },
       body: {
         ...event.data,
         telegram: {
           id: telegramUser.value?.id,
           username: telegramUser.value?.username,
-          first_name: telegramUser.value?.first_name,
         },
         initData: telegramInitData.value,
       },
