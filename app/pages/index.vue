@@ -53,7 +53,7 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
   loading.value = true;
   try {
     const tg = (window as any).Telegram?.WebApp;
-    await $fetch("https://something.loca.lt/review/", {
+    await $fetch("http://85.239.47.160:8000/review/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
