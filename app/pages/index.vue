@@ -26,6 +26,8 @@ onMounted(() => {
     const tg = (window as any).Telegram?.WebApp;
     if (tg) {
       tg.ready();
+      tg.expand();
+      console.log("user:", JSON.stringify(tg.initDataUnsafe));
       telegramUser.value = tg.initDataUnsafe?.user;
       telegramInitData.value = tg.initData;
     }
