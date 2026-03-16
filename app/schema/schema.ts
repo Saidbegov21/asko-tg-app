@@ -1,21 +1,33 @@
 import { z } from "zod";
 
-export const locationsArray = [
-  "Аско№1 Улица Шамиля 39",
-  "Аско№2 Улица батырая 39",
-  "Аско№3 Улица гагарина 39",
-  "Аско№4 Улица Гамидова 39",
+export const azsLocations = [
+  "Аско АЗС№1 Улица Шамиля 39",
+  "Аско АЗС№2 Улица Батырая 39",
+  "Аско АЗС№3 Улица Гагарина 39",
+  "Аско АЗС№4 Улица Гамидова 39",
 ] as const;
 
-type Location = (typeof locationsArray)[number];
+export const ezsLocations = [
+  "Аско ЭЗС№1 Улица Шамиля 39",
+  "Аско ЭЗС№2 Улица Батырая 39",
+] as const;
 
-export const locationsForSelect = [...locationsArray] as string[];
+export const allLocations = [...azsLocations, ...ezsLocations] as const;
+
+type Location = (typeof allLocations)[number];
+
+export const azsForSelect = [...azsLocations] as string[];
+export const ezsForSelect = [...ezsLocations] as string[];
 
 export const ReviewSchema = z.object({
+  station_type: z.enum(["АЗС", "ЭЗС"] as const, {
+  error: "Выберите тип станции",
+}),
+
   location: z
     .string()
     .min(1, "Пожалуйста, выберите заправочную станцию")
-    .refine((val) => locationsArray.includes(val as Location), {
+    .refine((val) => allLocations.includes(val as Location), {
       message: "Выбранная станция не существует",
     }),
 
@@ -33,7 +45,7 @@ export const ReviewSchema = z.object({
     ),
 
   rating: z
-    .number("Пожалуйста, поставьте оценку")
+    .number( "Пожалуйста, поставьте оценку")
     .min(1, "Пожалуйста, поставьте оценку")
     .max(5),
 
