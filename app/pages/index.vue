@@ -17,6 +17,7 @@ const form = ref<ReviewFormData>({
   phone: "",
   rating: 0,
   review: "",
+  consent: false,
 });
 
 onMounted(() => {
@@ -63,7 +64,8 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
       alert("Отзыв успешно отправлен!");
     }
   } catch (error: any) {
-    const message = error?.data?.message || "Ошибка отправки. Попробуйте снова.";
+    const message =
+      error?.data?.message || "Ошибка отправки. Попробуйте снова.";
     alert(`Ошибка: ${message}`);
   } finally {
     loading.value = false;
@@ -72,15 +74,14 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-100 flex items-center justify-center p-0 sm:p-4">
-    <div class="w-full max-w-120 min-h-screen sm:min-h-212.5 sm:rounded-[40px] shadow-2xl overflow-hidden bg-white flex flex-col">
-
+  <div
+    class="min-h-screen bg-slate-100 flex items-center justify-center p-0 sm:p-4"
+  >
+    <div
+      class="w-full max-w-120 min-h-screen sm:min-h-212.5 sm:rounded-[40px] shadow-2xl overflow-hidden bg-white flex flex-col"
+    >
       <Transition name="fade" mode="out-in">
-        <StationSelect
-          v-if="!selectedType"
-          key="select"
-          @select="selectType"
-        />
+        <StationSelect v-if="!selectedType" key="select" @select="selectType" />
         <ReviewForm
           v-else
           key="form"
@@ -92,7 +93,6 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
           @submit="onSubmit"
         />
       </Transition>
-
     </div>
   </div>
 </template>
@@ -100,7 +100,9 @@ const onSubmit = async (event: FormSubmitEvent<ReviewFormData>) => {
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 .fade-enter-from {
   opacity: 0;

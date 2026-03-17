@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { vMaska } from "maska/vue";
 import type { FormSubmitEvent } from "#ui/types";
-import { ReviewSchema, type ReviewFormData, azsForSelect, ezsForSelect } from "~/schema/schema";
+import {
+  ReviewSchema,
+  type ReviewFormData,
+  azsForSelect,
+  ezsForSelect,
+} from "~/schema/schema";
 
 type StationType = "АЗС" | "ЭЗС";
 
@@ -25,11 +30,13 @@ const currentLocations = computed(() => {
 
 <template>
   <div class="flex flex-col grow">
-
-    <!-- Шапка -->
     <div class="pt-12 pb-6 px-6 text-center border-b border-slate-100">
       <AppLogo
-        :subtitle="selectedType === 'АЗС' ? 'Оцените обслуживание на АЗС' : 'Оцените зарядку на ЭЗС'"
+        :subtitle="
+          selectedType === 'АЗС'
+            ? 'Оцените обслуживание на АЗС'
+            : 'Оцените зарядку на ЭЗС'
+        "
       />
     </div>
 
@@ -39,7 +46,6 @@ const currentLocations = computed(() => {
       @submit="emit('submit', $event)"
       class="flex flex-col gap-4 px-6 pt-6 pb-6 overflow-y-auto"
     >
-      <!-- Стрелка назад + бейдж -->
       <div class="flex items-center gap-2 mb-1">
         <button
           type="button"
@@ -50,7 +56,11 @@ const currentLocations = computed(() => {
         </button>
         <span
           class="text-sm font-bold px-3 py-1 rounded-full"
-          :class="selectedType === 'АЗС' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'"
+          :class="
+            selectedType === 'АЗС'
+              ? 'bg-red-100 text-red-600'
+              : 'bg-blue-100 text-blue-600'
+          "
         >
           {{ selectedType }}
         </span>
@@ -71,13 +81,13 @@ const currentLocations = computed(() => {
 
       <UFormField name="fullName">
         <template #label>
-          <span class="text-sm font-bold text-slate-700">ФИО</span>
+          <span class="text-sm font-bold text-slate-700">Укажите своё имя</span>
         </template>
         <UInput
           icon="line-md:account"
           class="w-full"
           v-model="form.fullName"
-          placeholder="Имя Фамилия Отчество"
+          placeholder="Имя"
         />
       </UFormField>
 
@@ -103,15 +113,33 @@ const currentLocations = computed(() => {
           class="w-full"
           v-model="form.review"
           placeholder="Что понравилось? Что можно улучшить?"
-          :rows="5"
+          :rows="3"
         />
       </UFormField>
 
       <UFormField name="rating">
-        <StarRating
-          v-model="form.rating"
-          :disabled="submitted"
-        />
+        <StarRating v-model="form.rating" :disabled="submitted" />
+      </UFormField>
+
+      <UFormField name="consent">
+        <div class="flex items-start gap-3 p-4 rounded-2xl bg-slate-50">
+          <input
+            type="checkbox"
+            id="consent"
+            v-model="form.consent"
+            :disabled="submitted"
+            class="mt-0.5 w-4 h-4 accent-red-500 cursor-pointer shrink-0"
+          />
+          <label
+            for="consent"
+            class="text-xs text-slate-500 leading-relaxed cursor-pointer"
+          >
+            Я согласен на обработку персональных данных в соответствии с
+            <a href="/privacy" class="text-red-500 font-medium hover:underline">
+              политикой конфиденциальности
+            </a>
+          </label>
+        </div>
       </UFormField>
 
       <UButton
@@ -121,11 +149,18 @@ const currentLocations = computed(() => {
         :loading="loading"
         :disabled="loading || submitted"
         class="w-full py-5 rounded-2xl text-base font-black transition-all cursor-pointer mt-2"
-        :class="submitted ? 'opacity-50 cursor-not-allowed' : 'active:scale-[0.97]'"
+        :class="
+          submitted ? 'opacity-50 cursor-not-allowed' : 'active:scale-[0.97]'
+        "
       >
-        {{ submitted ? "✓ Отзыв отправлен" : loading ? "Отправляем..." : "Отправить отзыв →" }}
+        {{
+          submitted
+            ? "Отзыв отправлен ✓"
+            : loading
+              ? "Отправляем..."
+              : "Отправить отзыв →"
+        }}
       </UButton>
-
     </UForm>
   </div>
 </template>
